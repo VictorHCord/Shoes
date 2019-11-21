@@ -26,6 +26,7 @@ module.exports = {
   ],
   rules: {
     'react/state-in-constructor': 'off',
+    'no-console': ["error", {allow: ["tron"]}],
     'prettier/prettier': 'error',
     'import/prefer-default-export': 'off',
     'react/static-property-placement': 'off',
