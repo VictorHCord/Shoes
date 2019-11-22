@@ -1,9 +1,20 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import { FaPlusCircle, FaMinusCircle, FaTrash } from 'react-icons/fa';
-
+import { formatPrice } from '../../util/format';
+import * as CartActions from '../../store/modules/cart/actions';
 import { Container, ProductTable, Total } from './styles';
 
-export default function Cart() {
+function Cart({ cart, total, removeFromCart, updateAmount }) {
+  function increment(product) {
+    updateAmount(product.id, product.amount + 1);
+  }
+
+  function decrement(product) {
+    updateAmount(product.id, product.amount - 1);
+  }
+
   return (
     <Container>
       <ProductTable>
@@ -17,38 +28,40 @@ export default function Cart() {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>
-              <img
-                src="https://static.netshoes.com.br/produtos/tenis-sneaker-meia-leve-calce-facil-vr/06/E74-0492-006/E74-0492-006_zoom1.jpg"
-                alt="Tênis"
-              />
-            </td>
+          {cart.map(product => (
+            <tr>
+              <td>
+                <img src={product.image} alt={product.title} />
+              </td>
 
-            <td>
-              <strong>Tênis</strong>
-              <span>R$1684,90</span>
-            </td>
-            <td>
-              <div>
-                <button type="button">
-                  <FaMinusCircle size={20} color="#0089f0" />
+              <td>
+                <strong>{product.title}</strong>
+                <span>{product.priceFormatted}</span>
+              </td>
+              <td>
+                <div>
+                  <button type="button" onClick={() => decrement(product)}>
+                    <FaMinusCircle size={20} color="#0089f0" />
+                  </button>
+                  <input type="number" readOnly value={product.amount} />
+                  <button type="button" onClick={() => increment(product)}>
+                    <FaPlusCircle size={20} color="#0089f0" />
+                  </button>
+                </div>
+              </td>
+              <td>
+                <strong>{product.subtotal}</strong>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  onClick={() => removeFromCart(product.id)}
+                >
+                  <FaTrash size={20} color="#0089f0" />
                 </button>
-                <input type="number" name="" readOnly value={2} />
-                <button type="button">
-                  <FaPlusCircle size={20} color="#0089f0" />
-                </button>
-              </div>
-            </td>
-            <td>
-              <strong>R$3.369,8</strong>
-            </td>
-            <td>
-              <button type="button">
-                <FaTrash size={20} color="#0089f0" />
-              </button>
-            </td>
-          </tr>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </ProductTable>
       <footer>
@@ -56,9 +69,25 @@ export default function Cart() {
 
         <Total>
           <span>TOTAL</span>
-          <strong>R$1569,60</strong>
+          <strong>{total}</strong>
         </Total>
       </footer>
     </Container>
   );
 }
+const mapStateToProps = state => ({
+  cart: state.cart.map(product => ({
+    ...product,
+    subtotal: formatPrice(product.price * product.amount),
+  })),
+  total: formatPrice(
+    state.cart.reduce((total, product) => {
+      return total + product.price * product.amount;
+    }, 0)
+  ),
+});
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(CartActions, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Cart);

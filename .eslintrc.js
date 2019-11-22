@@ -28,6 +28,7 @@ module.exports = {
     'react/state-in-constructor': 'off',
     'no-console': ["error", {allow: ["tron"]}],
     'prettier/prettier': 'error',
+    'no-param-reassign': 'off',
     'import/prefer-default-export': 'off',
     'react/static-property-placement': 'off',
     'react/jsx-filename-extension': [
