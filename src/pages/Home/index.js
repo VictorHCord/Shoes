@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { FaShoppingBasket } from 'react-icons/fa';
+import { FaShoppingBasket, FaSpinner } from 'react-icons/fa';
 import { ProductList } from './styles';
 import { formatPrice } from '../../util/format';
 import api from '../../services/api';
@@ -11,6 +11,7 @@ class Home extends Component {
   state = {
     /* vai armazenar os produtos */
     products: [],
+    loading: false,
   };
 
   /* Vai fazer a requisição para a api */
@@ -29,10 +30,12 @@ class Home extends Component {
     const { addToCartRequest } = this.props;
 
     addToCartRequest(id);
+
+    this.setState({ loading: true });
   };
 
   render() {
-    const { products } = this.state;
+    const { products, loading } = this.state;
     const { amount } = this.props;
 
     return (
@@ -44,6 +47,7 @@ class Home extends Component {
             <span>{product.priceFormatted}</span>
 
             <button
+              loading={loading ? <FaSpinner color="#fff" size={15} /> : null}
               type="button"
               onClick={() => this.handleAddProduct(product.id)}
             >
