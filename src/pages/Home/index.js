@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { FaShoppingBasket, FaSpinner } from 'react-icons/fa';
@@ -7,61 +7,53 @@ import { formatPrice } from '../../util/format';
 import api from '../../services/api';
 import * as CartActions from '../../store/modules/cart/actions';
 
-class Home extends Component {
-  state = {
-    /* vai armazenar os produtos */
-    products: [],
-    loading: false,
-  };
-
+function Home({ amount, addToCartRequest }) {
+  // Meus states
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
   /* Vai fazer a requisição para a api */
-  async componentDidMount() {
-    const response = await api.get('products');
+  useEffect(() => {
+    async function loadProducts() {
+      const response = await api.get('products');
 
-    const data = response.data.map(product => ({
-      ...product,
-      priceFormatted: formatPrice(product.price),
-    }));
+      const data = response.data.map(product => ({
+        ...product,
+        priceFormatted: formatPrice(product.price),
+      }));
+      setProducts(data);
+    }
+    loadProducts();
+  }, []);
 
-    this.setState({ products: data });
-  }
-
-  handleAddProduct = id => {
-    const { addToCartRequest } = this.props;
-
+  function handleAddProduct(id) {
     addToCartRequest(id);
 
-    this.setState({ loading: true });
-  };
-
-  render() {
-    const { products, loading } = this.state;
-    const { amount } = this.props;
-
-    return (
-      <ProductList>
-        {products.map(product => (
-          <li key={product.id}>
-            <img src={product.image} alt={product.title} />
-            <strong>{product.title}</strong>
-            <span>{product.priceFormatted}</span>
-
-            <button
-              loading={loading ? <FaSpinner color="#fff" size={15} /> : null}
-              type="button"
-              onClick={() => this.handleAddProduct(product.id)}
-            >
-              <div>
-                <FaShoppingBasket size={16} color="#fff" />
-                {amount[product.id] || 0}
-              </div>
-              <span>ADICIONAR AO CARRINHO</span>
-            </button>
-          </li>
-        ))}
-      </ProductList>
-    );
+    setLoading(true);
   }
+
+  return (
+    <ProductList>
+      {products.map(product => (
+        <li key={product.id}>
+          <img src={product.image} alt={product.title} />
+          <strong>{product.title}</strong>
+          <span>{product.priceFormatted}</span>
+
+          <button
+            loading={loading ? <FaSpinner color="#fff" size={15} /> : null}
+            type="button"
+            onClick={() => handleAddProduct(product.id)}
+          >
+            <div>
+              <FaShoppingBasket size={16} color="#fff" />
+              {amount[product.id] || 0}
+            </div>
+            <span>ADICIONAR AO CARRINHO</span>
+          </button>
+        </li>
+      ))}
+    </ProductList>
+  );
 }
 
 const mapStateToProps = state => ({
